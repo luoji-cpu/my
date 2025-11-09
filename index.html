@@ -1,0 +1,331 @@
+<!DOCTYPE html>
+<html lang="zh-CN" data-theme="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>💖 爱的告白 - 个人网站</title>
+    <meta name="description" content="一个充满爱意的个人网站，用弹窗传递温暖与浪漫">
+    <meta name="keywords" content="爱的告白,个人网站,浪漫,弹窗,GitHub Pages">
+    
+    <!-- TailwindCSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- DaisyUI CDN -->
+    <link href="https://cdn.bootcdn.net/ajax/libs/daisyui/4.12.10/full.min.css" rel="stylesheet">
+    <!-- Font Awesome -->
+    <link href="https://cdn.bootcdn.net/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    
+    <style>
+        body {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            overflow: hidden;
+        }
+        
+        .love-popup {
+            position: fixed;
+            border-radius: 15px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            cursor: pointer;
+            transition: all 0.3s ease;
+            z-index: 1000;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            font-weight: bold;
+            color: white;
+            text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.5);
+        }
+        
+        .love-popup:hover {
+            transform: scale(1.05);
+            box-shadow: 0 12px 40px rgba(0, 0, 0, 0.4);
+        }
+        
+        .heart-animation {
+            animation: heartbeat 1.5s ease-in-out infinite;
+        }
+        
+        @keyframes heartbeat {
+            0% { transform: scale(1); }
+            14% { transform: scale(1.3); }
+            28% { transform: scale(1); }
+            42% { transform: scale(1.3); }
+            70% { transform: scale(1); }
+        }
+        
+        .floating-hearts {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            pointer-events: none;
+        }
+        
+        .floating-heart {
+            position: absolute;
+            color: rgba(255, 182, 193, 0.6);
+            animation: float 6s ease-in-out infinite;
+        }
+        
+        @keyframes float {
+            0% {
+                transform: translateY(100vh) rotate(0deg);
+                opacity: 1;
+            }
+            100% {
+                transform: translateY(-100px) rotate(360deg);
+                opacity: 0;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- 主页面内容 -->
+    <div class="relative min-h-screen flex items-center justify-center">
+        <!-- 浮动爱心背景 -->
+        <div class="floating-hearts" id="floatingHearts"></div>
+        
+        <!-- 主要内容区域 -->
+        <div class="text-center z-10">
+            <div class="hero-content text-center">
+                <div class="max-w-md">
+                    <h1 class="text-5xl font-bold text-white mb-6 heart-animation">
+                        <i class="fas fa-heart text-red-400"></i>
+                        爱的告白
+                        <i class="fas fa-heart text-red-400"></i>
+                    </h1>
+                    <p class="text-xl text-white/90 mb-8">
+                        每一次弹窗，都是一次心跳的告白
+                    </p>
+                    <div class="space-y-4">
+                        <button class="btn btn-primary btn-lg" onclick="startLoveShow()">
+                            <i class="fas fa-play mr-2"></i>
+                            开始爱的表演
+                        </button>
+                        <button class="btn btn-secondary btn-lg" onclick="stopLoveShow()">
+                            <i class="fas fa-stop mr-2"></i>
+                            暂停表演
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- 统计信息 -->
+        <div class="absolute bottom-8 left-8 bg-white/10 backdrop-blur-md rounded-lg p-4 text-white">
+            <div class="text-sm">
+                <div>已显示弹窗: <span id="popupCount" class="font-bold">0</span></div>
+                <div>运行时间: <span id="runTime" class="font-bold">00:00</span></div>
+            </div>
+        </div>
+        
+        <!-- 社交链接 -->
+        <div class="absolute bottom-8 right-8 flex space-x-4">
+            <a href="https://github.com" target="_blank" class="btn btn-circle btn-ghost text-white">
+                <i class="fab fa-github text-xl"></i>
+            </a>
+            <a href="#" class="btn btn-circle btn-ghost text-white">
+                <i class="fas fa-heart text-xl"></i>
+            </a>
+        </div>
+    </div>
+
+    <script>
+        // 全局变量
+        let popupInterval;
+        let startTime = Date.now();
+        let popupCount = 0;
+        let isRunning = false;
+
+        // 爱的文案列表
+        const loveMessages = [
+            "我爱你，胜过昨日，略匮明朝",
+            "遇见你，是我所有美好故事的开始",
+            "你是我藏在微风里的喜欢",
+            "山河远阔，人间烟火，无一是你，无一不是你",
+            "我贪恋的人间烟火，不偏不倚恰好是你",
+            "你是我疲惫生活的解药",
+            "我想和你有以后",
+            "你一笑，我的世界就亮了",
+            "你是我绕过山河，才遇见的人间理想",
+            "我对你所有的喜欢加起来，就是一颗星球的重量",
+            "你是我眼中最温柔的月光",
+            "我想和你一起走过四季，看尽人间烟火",
+            "你是我心中最柔软的那部分",
+            "我愿意用整个青春，换一个和你共度余生的机会",
+            "你是我所有的不动声色中，最盛大的欢喜",
+            "我想和你一起走过所有的春夏秋冬",
+            "你是我心中永远的温柔",
+            "我愿意为你，千千万万遍",
+            "你是我生命中最美好的遇见",
+            "我想和你一起慢慢变老"
+        ];
+
+        // 柔和的颜色列表
+        const softColors = [
+            '#FF6B6B', '#4ECDC4', '#45B7D1', '#96CEB4', '#FECA57',
+            '#FF9FF3', '#54A0FF', '#5F27CD', '#00D2D3', '#FF9F43',
+            '#EE5A24', '#0097E6', '#00A8FF', '#9C88FF', '#00CED1',
+            '#48DBFB', '#0ABDE3', '#FC427B', '#B33771', '#FD7272'
+        ];
+
+        // 字体列表
+        const fonts = [
+            'Microsoft YaHei', 'SimSun', 'SimHei', 'KaiTi', 'FangSong',
+            'Arial', 'Verdana', 'Georgia', 'Times New Roman', 'Courier New'
+        ];
+
+        // 创建浮动爱心背景
+        function createFloatingHearts() {
+            const container = document.getElementById('floatingHearts');
+            for (let i = 0; i < 15; i++) {
+                setTimeout(() => {
+                    const heart = document.createElement('i');
+                    heart.className = 'fas fa-heart floating-heart';
+                    heart.style.left = Math.random() * 100 + '%';
+                    heart.style.fontSize = (Math.random() * 20 + 10) + 'px';
+                    heart.style.animationDelay = Math.random() * 6 + 's';
+                    heart.style.animationDuration = (Math.random() * 3 + 3) + 's';
+                    container.appendChild(heart);
+                    
+                    setTimeout(() => heart.remove(), 6000);
+                }, i * 400);
+            }
+        }
+
+        // 创建弹窗
+        function createPopup() {
+            const popup = document.createElement('div');
+            popup.className = 'love-popup';
+            
+            // 自适应尺寸计算
+            const screenWidth = window.innerWidth;
+            const screenHeight = window.innerHeight;
+            
+            let popupWidth, popupHeight;
+            
+            if (screenWidth <= 480) {
+                // 手机端
+                popupWidth = Math.min(Math.floor(screenWidth * 0.85), 160);
+                popupHeight = Math.max(Math.floor(screenHeight * 0.12), 60);
+            } else if (screenWidth <= 768) {
+                // 平板端
+                popupWidth = Math.min(Math.floor(screenWidth * 0.4), 180);
+                popupHeight = Math.max(Math.floor(screenHeight * 0.13), 70);
+            } else {
+                // 桌面端
+                popupWidth = Math.min(Math.floor(screenWidth * 0.25), 200);
+                popupHeight = Math.max(Math.floor(screenHeight * 0.15), 80);
+            }
+            
+            // 随机位置计算
+            const maxX = screenWidth - popupWidth - 20;
+            const maxY = screenHeight - popupHeight - 20;
+            const randomX = Math.max(10, Math.floor(Math.random() * maxX));
+            const randomY = Math.max(10, Math.floor(Math.random() * maxY));
+            
+            // 随机样式
+            const bgColor = softColors[Math.floor(Math.random() * softColors.length)];
+            const message = loveMessages[Math.floor(Math.random() * loveMessages.length)];
+            const fontFamily = fonts[Math.floor(Math.random() * fonts.length)];
+            const opacity = 0.8 + Math.random() * 0.2;
+            
+            // 设置样式
+            popup.style.width = popupWidth + 'px';
+            popup.style.height = popupHeight + 'px';
+            popup.style.left = randomX + 'px';
+            popup.style.top = randomY + 'px';
+            popup.style.backgroundColor = bgColor;
+            popup.style.fontFamily = fontFamily;
+            popup.style.opacity = opacity;
+            popup.style.fontSize = Math.max(12, Math.min(16, popupHeight / 4)) + 'px';
+            popup.style.padding = '10px';
+            
+            popup.textContent = message;
+            
+            // 点击关闭
+            popup.onclick = function() {
+                this.remove();
+                popupCount--;
+                updateStats();
+            };
+            
+            // 自动消失
+            setTimeout(() => {
+                if (popup.parentNode) {
+                    popup.remove();
+                    popupCount--;
+                    updateStats();
+                }
+            }, 8000);
+            
+            document.body.appendChild(popup);
+            popupCount++;
+            updateStats();
+        }
+
+        // 开始爱的表演
+        function startLoveShow() {
+            if (isRunning) return;
+            isRunning = true;
+            startTime = Date.now();
+            popupInterval = setInterval(createPopup, 600);
+            createFloatingHearts();
+        }
+
+        // 停止表演
+        function stopLoveShow() {
+            if (!isRunning) return;
+            isRunning = false;
+            clearInterval(popupInterval);
+            
+            // 清除所有弹窗
+            document.querySelectorAll('.love-popup').forEach(popup => popup.remove());
+            popupCount = 0;
+            updateStats();
+        }
+
+        // 更新统计信息
+        function updateStats() {
+            document.getElementById('popupCount').textContent = popupCount;
+            
+            if (isRunning) {
+                const elapsed = Math.floor((Date.now() - startTime) / 1000);
+                const minutes = Math.floor(elapsed / 60);
+                const seconds = elapsed % 60;
+                document.getElementById('runTime').textContent = 
+                    `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+            }
+        }
+
+        // 定时更新运行时间
+        setInterval(updateStats, 1000);
+
+        // 窗口大小改变时重新计算
+        window.addEventListener('resize', () => {
+            // 重新计算现有弹窗位置
+            document.querySelectorAll('.love-popup').forEach(popup => {
+                const screenWidth = window.innerWidth;
+                const screenHeight = window.innerHeight;
+                const popupWidth = popup.offsetWidth;
+                const popupHeight = popup.offsetHeight;
+                
+                const maxX = screenWidth - popupWidth - 20;
+                const maxY = screenHeight - popupHeight - 20;
+                
+                popup.style.left = Math.max(10, Math.min(parseInt(popup.style.left), maxX)) + 'px';
+                popup.style.top = Math.max(10, Math.min(parseInt(popup.style.top), maxY)) + 'px';
+            });
+        });
+
+        // 页面加载完成后的初始化
+        document.addEventListener('DOMContentLoaded', function() {
+            createFloatingHearts();
+            setInterval(createFloatingHearts, 8000);
+        });
+    </script>
+</body>
+</html>

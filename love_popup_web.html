@@ -1,0 +1,597 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>爱心告白弹窗</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Microsoft YaHei', 'SimSun', 'Arial', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .heart {
+            position: fixed;
+            background: #ff6b6b;
+            transform: rotate(-45deg);
+            animation: float 3s ease-in-out infinite;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            z-index: 1000;
+        }
+
+        .heart:before,
+        .heart:after {
+            content: '';
+            width: 100%;
+            height: 100%;
+            position: absolute;
+            background: inherit;
+            border-radius: 50%;
+        }
+
+        .heart:before {
+            top: -50%;
+            left: 0;
+        }
+
+        .heart:after {
+            left: 50%;
+            top: 0;
+        }
+
+        .heart:hover {
+            transform: rotate(-45deg) scale(1.2);
+            filter: brightness(1.2);
+        }
+
+        @keyframes float {
+            0%, 100% {
+                transform: rotate(-45deg) translateY(0px);
+            }
+            50% {
+                transform: rotate(-45deg) translateY(-20px);
+            }
+        }
+
+        .popup {
+            position: fixed;
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 15px;
+            padding: clamp(12px, 2vw, 24px);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            z-index: 1001;
+            animation: popupIn 0.5s ease-out;
+            text-align: center;
+            min-width: min(200px, 80vw);
+            max-width: min(350px, 90vw);
+            min-height: min(100px, 30vh);
+            max-height: min(200px, 50vh);
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+        }
+
+        @media (max-width: 768px) {
+            .popup {
+                min-width: min(250px, 85vw);
+                max-width: min(300px, 90vw);
+                padding: clamp(10px, 3vw, 20px);
+            }
+        }
+
+        @media (max-width: 480px) {
+            .popup {
+                min-width: min(200px, 90vw);
+                max-width: min(280px, 95vw);
+                padding: clamp(8px, 4vw, 16px);
+                border-radius: 12px;
+            }
+        }
+
+        @keyframes popupIn {
+            from {
+                opacity: 0;
+                transform: scale(0.5) translateY(-50px);
+            }
+            to {
+                opacity: 1;
+                transform: scale(1) translateY(0);
+            }
+        }
+
+        .popup-content {
+            color: #333;
+            font-size: 16px;
+            line-height: 1.5;
+            margin-bottom: 10px;
+        }
+
+        .close-btn {
+            background: #ff6b6b;
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 20px;
+            cursor: pointer;
+            font-size: 12px;
+            transition: background 0.3s ease;
+        }
+
+        .close-btn:hover {
+            background: #ff5252;
+        }
+
+        .control-panel {
+            position: fixed;
+            top: 20px;
+            left: 20px;
+            background: rgba(255, 255, 255, 0.9);
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
+            z-index: 1002;
+        }
+
+        .control-btn {
+            background: #667eea;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            margin: 5px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: background 0.3s ease;
+        }
+
+        .control-btn:hover {
+            background: #5a6fd8;
+        }
+
+        .title {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            color: white;
+            font-size: 48px;
+            font-weight: bold;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+            z-index: 999;
+            animation: pulse 2s ease-in-out infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% {
+                opacity: 1;
+            }
+            50% {
+                opacity: 0.7;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="title">❤️ 爱心告白 ❤️</div>
+    
+    <div class="control-panel">
+        <h3>控制面板</h3>
+        <button class="control-btn" onclick="startPopup()">开始弹窗</button>
+        <button class="control-btn" onclick="stopPopup()">停止弹窗</button>
+        <button class="control-btn" onclick="clearPopups()">清除所有</button>
+    </div>
+
+    <script>
+        // 爱心文案列表
+        const loveMessages = [
+            "遇见你，是我最美的意外",
+            "喜欢你，认真且怂，从一而终",
+            "你是我藏在心里的星光",
+            "我想和你一起走过四季",
+            "你的名字，是我读过最短的情诗",
+            "遇见你之前，爱情只是个词",
+            "我想牵你的手，敬四方来宾的酒",
+            "你是我温暖的手套，冰冷的啤酒",
+            "我想和你一起生活，在某个小镇",
+            "你是我所有自卑的解药",
+            "我想和你有以后",
+            "你是我疲惫生活的希望与糖",
+            "我想和你一起看日出日落",
+            "你是我心里最柔软的地方",
+            "我想和你有很长的未来",
+            "你是我所有不理智的原因",
+            "我想和你一起变老",
+            "你是我眼里的光",
+            "我想和你有以后",
+            "你是我所有的少女情怀和心之所向"
+        ];
+
+        // 柔和颜色列表
+        const softColors = [
+            '#FFB6C1', '#FFC0CB', '#FF69B4', '#FF1493',
+            '#DB7093', '#FFA0C9', '#FFB7D5', '#FFCCFF',
+            '#FFDDF4', '#FFE4E1', '#FFF0F5', '#F0FFF0',
+            '#E0FFFF', '#F0F8FF', '#F5F5DC', '#FFF8DC',
+            '#FFE4B5', '#FFDAB9', '#FFEFD5', '#FFFACD'
+        ];
+
+        // 字体列表
+        const fonts = [
+            'Microsoft YaHei', 'SimSun', 'SimHei', 'KaiTi',
+            'FangSong', 'Arial', 'Times New Roman', 'Georgia',
+            'Comic Sans MS', 'Impact', 'Verdana', 'Tahoma'
+        ];
+
+        let popupInterval = null;
+        let popupCount = 0;
+
+        // 弹窗位置管理器
+        const popupManager = {
+            positions: [],
+            maxAttempts: 50,
+            spacing: 20,
+            
+            // 检查位置是否重叠
+            isOverlapping: function(x, y, width, height) {
+                for (let pos of this.positions) {
+                    if (x < pos.x + pos.width + this.spacing &&
+                        x + width + this.spacing > pos.x &&
+                        y < pos.y + pos.height + this.spacing &&
+                        y + height + this.spacing > pos.y) {
+                        return true;
+                    }
+                }
+                return false;
+            },
+            
+            // 获取最佳位置
+            getOptimalPosition: function(width, height) {
+                const attempts = [];
+                const screenWidth = window.innerWidth;
+                const screenHeight = window.innerHeight;
+                
+                // 根据屏幕尺寸调整间距
+                const adaptiveSpacing = Math.min(this.spacing, Math.min(screenWidth, screenHeight) * 0.05);
+                
+                // 策略1: 网格布局（自适应网格大小）
+                const cols = Math.max(1, Math.floor(screenWidth / (width + adaptiveSpacing)));
+                const rows = Math.max(1, Math.floor(screenHeight / (height + adaptiveSpacing)));
+                
+                for (let r = 0; r < rows && attempts.length < this.maxAttempts; r++) {
+                    for (let c = 0; c < cols && attempts.length < this.maxAttempts; c++) {
+                        const x = c * (width + adaptiveSpacing) + adaptiveSpacing;
+                        const y = r * (height + adaptiveSpacing) + adaptiveSpacing;
+                        
+                        if (x + width <= screenWidth - adaptiveSpacing && 
+                            y + height <= screenHeight - adaptiveSpacing) {
+                            attempts.push({x, y, score: this.calculateScore(x, y, width, height)});
+                        }
+                    }
+                }
+                
+                // 策略2: 螺旋布局（从中心向外，自适应半径）
+                const centerX = screenWidth / 2;
+                const centerY = screenHeight / 2;
+                let angle = 0;
+                let radius = Math.min(screenWidth, screenHeight) * 0.15; // 自适应起始半径
+                
+                for (let i = 0; i < 20 && attempts.length < this.maxAttempts; i++) {
+                    const x = centerX + Math.cos(angle) * radius - width / 2;
+                    const y = centerY + Math.sin(angle) * radius - height / 2;
+                    
+                    if (x >= adaptiveSpacing && y >= adaptiveSpacing && 
+                        x + width <= screenWidth - adaptiveSpacing && 
+                        y + height <= screenHeight - adaptiveSpacing) {
+                        attempts.push({x, y, score: this.calculateScore(x, y, width, height)});
+                    }
+                    
+                    angle += Math.PI / 4;
+                    radius += Math.min(screenWidth, screenHeight) * 0.08; // 自适应步长
+                }
+                
+                // 策略3: 边缘填充（自适应边缘距离）
+                const edgeMargin = Math.max(adaptiveSpacing, Math.min(screenWidth, screenHeight) * 0.03);
+                const edgePositions = [
+                    {x: edgeMargin, y: edgeMargin},
+                    {x: screenWidth - width - edgeMargin, y: edgeMargin},
+                    {x: edgeMargin, y: screenHeight - height - edgeMargin},
+                    {x: screenWidth - width - edgeMargin, y: screenHeight - height - edgeMargin}
+                ];
+                
+                edgePositions.forEach(pos => {
+                    if (attempts.length < this.maxAttempts) {
+                        attempts.push({...pos, score: this.calculateScore(pos.x, pos.y, width, height)});
+                    }
+                });
+                
+                // 策略4: 响应式中心区域填充（小屏幕优化）
+                if (screenWidth <= 768) {
+                    const centerArea = {
+                        x: centerX - width/2 + (Math.random() - 0.5) * screenWidth * 0.3,
+                        y: centerY - height/2 + (Math.random() - 0.5) * screenHeight * 0.3
+                    };
+                    
+                    // 确保在屏幕范围内
+                    centerArea.x = Math.max(adaptiveSpacing, Math.min(centerArea.x, screenWidth - width - adaptiveSpacing));
+                    centerArea.y = Math.max(adaptiveSpacing, Math.min(centerArea.y, screenHeight - height - adaptiveSpacing));
+                    
+                    attempts.push({...centerArea, score: this.calculateScore(centerArea.x, centerArea.y, width, height)});
+                }
+                
+                // 按评分排序并选择最佳位置
+                attempts.sort((a, b) => b.score - a.score);
+                
+                for (let attempt of attempts) {
+                    if (!this.isOverlapping(attempt.x, attempt.y, width, height)) {
+                        this.positions.push({
+                            x: attempt.x,
+                            y: attempt.y,
+                            width: width,
+                            height: height,
+                            timestamp: Date.now()
+                        });
+                        return {x: attempt.x, y: attempt.y};
+                    }
+                }
+                
+                // 如果所有位置都重叠，使用随机位置（确保在屏幕范围内）
+                const x = Math.floor(Math.random() * (screenWidth - width - adaptiveSpacing * 2)) + adaptiveSpacing;
+                const y = Math.floor(Math.random() * (screenHeight - height - adaptiveSpacing * 2)) + adaptiveSpacing;
+                
+                this.positions.push({
+                    x: x,
+                    y: y,
+                    width: width,
+                    height: height,
+                    timestamp: Date.now()
+                });
+                
+                return {x, y};
+            },
+            
+            // 计算位置评分（自适应中心优先，避免边缘）
+            calculateScore: function(x, y, width, height) {
+                const screenWidth = window.innerWidth;
+                const screenHeight = window.innerHeight;
+                const centerX = screenWidth / 2;
+                const centerY = screenHeight / 2;
+                const popupCenterX = x + width / 2;
+                const popupCenterY = y + height / 2;
+                
+                // 距离中心越近分数越高（自适应权重）
+                const distanceToCenter = Math.sqrt(
+                    Math.pow(popupCenterX - centerX, 2) + 
+                    Math.pow(popupCenterY - centerY, 2)
+                );
+                
+                // 距离边缘越远分数越高（自适应边缘距离）
+                const minEdgeDistance = Math.min(screenWidth, screenHeight) * 0.05;
+                const distanceToEdge = Math.min(
+                    x - minEdgeDistance,
+                    y - minEdgeDistance,
+                    screenWidth - x - width - minEdgeDistance,
+                    screenHeight - y - height - minEdgeDistance
+                );
+                
+                // 屏幕尺寸权重调整
+                const screenSizeFactor = Math.min(screenWidth, screenHeight) / 1000;
+                const centerWeight = screenWidth <= 768 ? 1.5 : 1.0; // 小屏幕更偏向中心
+                
+                // 综合评分（自适应权重）
+                let score = 1000 - (distanceToCenter * centerWeight) + Math.max(0, distanceToEdge * 2);
+                
+                // 小屏幕额外优化：避免太靠近边缘
+                if (screenWidth <= 480) {
+                    const edgePenalty = Math.max(0, minEdgeDistance - Math.min(x, y, screenWidth - x - width, screenHeight - y - height)) * 5;
+                    score -= edgePenalty;
+                }
+                
+                return Math.max(0, score);
+            },
+            
+            // 清理过期位置
+            cleanup: function() {
+                const now = Date.now();
+                this.positions = this.positions.filter(pos => now - pos.timestamp < 10000);
+            }
+        };
+
+        function createPopup() {
+            const popup = document.createElement('div');
+            popup.className = 'popup';
+            
+            // 自适应大小计算
+            const screenWidth = window.innerWidth;
+            const screenHeight = window.innerHeight;
+            
+            // 根据屏幕尺寸动态计算弹窗大小
+            let baseWidth, baseHeight;
+            
+            if (screenWidth <= 480) {
+                // 手机端
+                baseWidth = Math.floor(Math.random() * 60) + 200; // 200-260px
+                baseHeight = Math.floor(Math.random() * 40) + 100; // 100-140px
+            } else if (screenWidth <= 768) {
+                // 平板端
+                baseWidth = Math.floor(Math.random() * 80) + 220; // 220-300px
+                baseHeight = Math.floor(Math.random() * 50) + 110; // 110-160px
+            } else {
+                // 桌面端
+                baseWidth = Math.floor(Math.random() * 100) + 250; // 250-350px
+                baseHeight = Math.floor(Math.random() * 60) + 120; // 120-180px
+            }
+            
+            // 确保不超过屏幕的90%
+            const maxWidth = Math.min(baseWidth, screenWidth * 0.85);
+            const maxHeight = Math.min(baseHeight, screenHeight * 0.7);
+            
+            // 获取优化位置
+            const position = popupManager.getOptimalPosition(maxWidth, maxHeight);
+            
+            // 清理过期位置
+            popupManager.cleanup();
+            
+            // 随机样式
+            const bgColor = softColors[Math.floor(Math.random() * softColors.length)];
+            const message = loveMessages[Math.floor(Math.random() * loveMessages.length)];
+            const font = fonts[Math.floor(Math.random() * fonts.length)];
+            
+            popup.style.left = position.x + 'px';
+            popup.style.top = position.y + 'px';
+            popup.style.width = maxWidth + 'px';
+            popup.style.minHeight = maxHeight + 'px';
+            popup.style.backgroundColor = bgColor + '99';
+            popup.style.fontFamily = font;
+            
+            popup.innerHTML = `
+                <div class="popup-content">${message}</div>
+                <button class="close-btn" onclick="this.parentElement.remove()">关闭</button>
+            `;
+            
+            document.body.appendChild(popup);
+            popupCount++;
+            
+            // 自动关闭
+            setTimeout(() => {
+                if (popup.parentElement) {
+                    popup.remove();
+                }
+            }, 5000 + Math.random() * 5000);
+        }
+
+        function createHeart() {
+            const heart = document.createElement('div');
+            heart.className = 'heart';
+            
+            const size = Math.floor(Math.random() * 30) + 20;
+            heart.style.width = size + 'px';
+            heart.style.height = size + 'px';
+            
+            const maxX = window.innerWidth - size;
+            const maxY = window.innerHeight - size;
+            heart.style.left = Math.floor(Math.random() * maxX) + 'px';
+            heart.style.top = Math.floor(Math.random() * maxY) + 'px';
+            
+            heart.style.backgroundColor = softColors[Math.floor(Math.random() * softColors.length)];
+            
+            heart.onclick = function() {
+                this.remove();
+                createPopup();
+            };
+            
+            document.body.appendChild(heart);
+            
+            setTimeout(() => {
+                if (heart.parentElement) {
+                    heart.remove();
+                }
+            }, 10000);
+        }
+
+        function startPopup() {
+            if (popupInterval) return;
+            
+            // 创建初始爱心
+            for (let i = 0; i < 5; i++) {
+                setTimeout(createHeart, i * 200);
+            }
+            
+            // 定期创建弹窗 - 优化频率为0.6秒
+            popupInterval = setInterval(() => {
+                createPopup();
+                // 降低额外爱心出现的概率
+                if (Math.random() > 0.85) {
+                    createHeart();
+                }
+            }, 600);
+        }
+
+        function stopPopup() {
+            if (popupInterval) {
+                clearInterval(popupInterval);
+                popupInterval = null;
+            }
+        }
+
+        function clearPopups() {
+            stopPopup();
+            document.querySelectorAll('.popup').forEach(popup => popup.remove());
+            document.querySelectorAll('.heart').forEach(heart => heart.remove());
+        }
+
+        // 响应式处理：窗口大小变化时重新计算
+        let resizeTimeout;
+        window.addEventListener('resize', () => {
+            clearTimeout(resizeTimeout);
+            resizeTimeout = setTimeout(() => {
+                // 清理位置缓存，重新布局
+                popupManager.positions = [];
+                
+                // 调整现有弹窗大小
+                document.querySelectorAll('.popup').forEach(popup => {
+                    const newSize = calculateAdaptiveSize();
+                    popup.style.width = newSize.width + 'px';
+                    popup.style.minHeight = newSize.height + 'px';
+                });
+            }, 300);
+        });
+
+        // 计算自适应大小的工具函数
+        function calculateAdaptiveSize() {
+            const screenWidth = window.innerWidth;
+            const screenHeight = window.innerHeight;
+            
+            // 基础尺寸比例
+            const baseWidth = Math.min(200, Math.max(120, screenWidth * 0.25));
+            const baseHeight = Math.min(120, Math.max(80, screenHeight * 0.15));
+            
+            // 小屏幕优化
+            if (screenWidth <= 480) {
+                return {
+                    width: Math.min(160, screenWidth * 0.85),
+                    height: Math.min(100, screenHeight * 0.12)
+                };
+            } else if (screenWidth <= 768) {
+                return {
+                    width: Math.min(180, screenWidth * 0.4),
+                    height: Math.min(110, screenHeight * 0.13)
+                };
+            }
+            
+            return { width: baseWidth, height: baseHeight };
+        }
+
+        // 页面加载完成后自动开始
+        window.addEventListener('load', () => {
+            setTimeout(startPopup, 1000);
+        });
+
+        // 点击页面任意位置也可以创建爱心
+        document.addEventListener('click', (e) => {
+            if (e.target === document.body || e.target.className === 'title') {
+                createHeart();
+            }
+        });
+
+        // 添加触摸设备支持
+        document.addEventListener('touchstart', (e) => {
+            if (e.target === document.body || e.target.className === 'title') {
+                createHeart();
+            }
+        });
+    </script>
+</body>
+</html>
