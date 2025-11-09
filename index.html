@@ -23,25 +23,171 @@
         
         .love-popup {
             position: fixed;
-            border-radius: 15px;
-            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
-            backdrop-filter: blur(10px);
-            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 20px;
+            box-shadow: 
+                0 8px 32px rgba(0, 0, 0, 0.2),
+                0 2px 8px rgba(255, 255, 255, 0.1) inset,
+                0 -2px 8px rgba(0, 0, 0, 0.1) inset;
+            backdrop-filter: blur(15px);
+            border: 2px solid rgba(255, 255, 255, 0.3);
             cursor: pointer;
-            transition: all 0.3s ease;
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
             z-index: 1000;
             display: flex;
+            flex-direction: column;
             align-items: center;
             justify-content: center;
             text-align: center;
-            font-weight: bold;
+            font-weight: 600;
             color: white;
-            text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.5);
+            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+            background: linear-gradient(135deg, rgba(255, 255, 255, 0.1) 0%, rgba(255, 255, 255, 0.05) 100%);
+            overflow: hidden;
+            animation: popupAppear 0.6s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+        }
+        
+        .love-popup::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: linear-gradient(
+                45deg,
+                transparent 30%,
+                rgba(255, 255, 255, 0.1) 50%,
+                transparent 70%
+            );
+            animation: shimmer 3s infinite;
         }
         
         .love-popup:hover {
-            transform: scale(1.05);
-            box-shadow: 0 12px 40px rgba(0, 0, 0, 0.4);
+            transform: scale(1.08) translateY(-2px);
+            box-shadow: 
+                0 12px 40px rgba(0, 0, 0, 0.3),
+                0 4px 12px rgba(255, 255, 255, 0.2) inset,
+                0 -4px 12px rgba(0, 0, 0, 0.2) inset;
+            border-color: rgba(255, 255, 255, 0.5);
+        }
+        
+        .love-popup-content {
+            position: relative;
+            z-index: 2;
+            padding: 15px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .love-popup-icon {
+            font-size: 1.2em;
+            margin-bottom: 5px;
+            animation: heartFloat 2s ease-in-out infinite;
+        }
+        
+        .love-popup-text {
+            font-size: 1.1em;
+            line-height: 1.6;
+            letter-spacing: 0.8px;
+            word-wrap: break-word;
+            hyphens: auto;
+            max-width: 100%;
+            text-shadow: 
+                0 1px 2px rgba(0, 0, 0, 0.3),
+                0 0 10px rgba(255, 255, 255, 0.2);
+            font-weight: 500;
+            background: linear-gradient(45deg, #fff, #f0f0f0);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            filter: drop-shadow(0 0 5px rgba(255, 255, 255, 0.5));
+        }
+        
+        /* 响应式文字大小 */
+        @media (max-width: 480px) {
+            .love-popup-text {
+                font-size: 0.95em;
+                line-height: 1.5;
+                letter-spacing: 0.6px;
+            }
+            .love-popup-icon {
+                font-size: 1em;
+            }
+        }
+        
+        @media (min-width: 481px) and (max-width: 768px) {
+            .love-popup-text {
+                font-size: 1.05em;
+                line-height: 1.55;
+            }
+            .love-popup-icon {
+                font-size: 1.1em;
+            }
+        }
+        
+        @media (min-width: 769px) {
+            .love-popup-text {
+                font-size: 1.15em;
+                line-height: 1.65;
+            }
+            .love-popup-icon {
+                font-size: 1.3em;
+            }
+        }
+        
+        /* 特殊文字效果 */
+        .love-popup-text::selection {
+            background: rgba(255, 255, 255, 0.3);
+            color: white;
+        }
+        
+        @keyframes popupAppear {
+            0% {
+                opacity: 0;
+                transform: scale(0.3) rotate(-10deg);
+            }
+            50% {
+                transform: scale(1.1) rotate(2deg);
+            }
+            100% {
+                opacity: 1;
+                transform: scale(1) rotate(0deg);
+            }
+        }
+        
+        @keyframes shimmer {
+            0% {
+                transform: translateX(-100%) translateY(-100%) rotate(45deg);
+            }
+            100% {
+                transform: translateX(100%) translateY(100%) rotate(45deg);
+            }
+        }
+        
+        @keyframes heartFloat {
+            0%, 100% {
+                transform: translateY(0px);
+            }
+            50% {
+                transform: translateY(-3px);
+            }
+        }
+        
+        .love-popup.fade-out {
+            animation: popupDisappear 0.4s ease-in forwards;
+        }
+        
+        @keyframes popupDisappear {
+            0% {
+                opacity: 1;
+                transform: scale(1) rotate(0deg);
+            }
+            100% {
+                opacity: 0;
+                transform: scale(0.8) rotate(10deg);
+            }
         }
         
         .heart-animation {
@@ -85,6 +231,20 @@
 <body>
     <!-- 主页面内容 -->
     <div class="relative min-h-screen flex items-center justify-center">
+        <!-- 个性签名 -->
+        <div class="absolute top-4 left-4 z-50">
+            <div class="bg-white/10 backdrop-blur-md rounded-lg p-3 border border-white/20">
+                <div class="text-white text-sm font-light tracking-wide">
+                    <span class="text-pink-300">✨</span>
+                    <span class="font-semibold">送给亲爱的波波</span>
+                    <span class="text-white/70">· 用心创造美好</span>
+                </div>
+                <div class="text-white/60 text-xs mt-1 pl-4">
+                    代码如诗，爱意如歌
+                </div>
+            </div>
+        </div>
+
         <!-- 浮动爱心背景 -->
         <div class="floating-hearts" id="floatingHearts"></div>
         
@@ -161,7 +321,39 @@
             "你是我心中永远的温柔",
             "我愿意为你，千千万万遍",
             "你是我生命中最美好的遇见",
-            "我想和你一起慢慢变老"
+            "我想和你一起慢慢变老",
+            "你是我藏在心底的温柔，是我目光所及的星光",
+            "遇见你之前，爱情只是个词；遇见你之后，它有了名字",
+            "你是我所有的不期而遇，也是我所有的蓄谋已久",
+            "我想把世界上最好的都给你，却发现世界上最好的就是你",
+            "你是我温暖的手套，冰冷的啤酒，带着阳光味道的衬衫",
+            "我愿意做你生命中的那道光，照亮你所有的黑暗",
+            "你是我心中永远的春天，让我的世界永远繁花似锦",
+            "我想和你一起看日出日落，一起数星星，一起变老",
+            "你是我心中最珍贵的宝藏，是我此生最美的遇见",
+            "我愿意用余生的温柔，换你一世的笑颜",
+            "你是我心中最柔软的角落，是我此生最温暖的归宿",
+            "我想和你一起走过每一个平凡的日子，因为有你就不平凡",
+            "你是我心中最美的风景，是我此生最动人的诗篇",
+            "我愿意为你撑起一片天，让你永远不再受伤",
+            "你是我心中最甜蜜的负担，是我此生最幸福的牵挂",
+            "我想和你一起走过风雨，一起迎接彩虹",
+            "你是我心中最温暖的阳光，是我此生最温柔的守候",
+            "我愿意为你放弃整个世界，只为拥抱你",
+            "你是我心中最璀璨的星辰，是我此生最耀眼的光芒",
+            "我想和你一起走过每一个春夏秋冬，直到永远",
+            "你是我心中最柔软的梦，是我此生最甜蜜的幻想",
+            "我愿意为你付出一切，只为看到你幸福的笑容",
+            "你是我心中最珍贵的礼物，是我此生最幸运的拥有",
+            "我想和你一起走过每一个日出日落，直到地老天荒",
+            "你是我心中最温暖的港湾，是我此生最安心的依靠",
+            "我愿意为你等待千年，只为与你相遇",
+            "你是我心中最美丽的意外，是我此生最惊喜的遇见",
+            "我想和你一起走过每一个平凡的日子，因为有你就不平凡",
+            "你是我心中最动人的旋律，是我此生最优美的乐章",
+            "我愿意为你守候一生，只为与你相守",
+            "你是我心中最甜蜜的毒药，是我此生最甘心的沉沦",
+            "我想和你一起走过每一个春夏秋冬，直到永远永远"
         ];
 
         // 柔和的颜色列表
@@ -201,37 +393,37 @@
             const popup = document.createElement('div');
             popup.className = 'love-popup';
             
-            // 自适应尺寸计算
+            // 自适应尺寸计算 - 更智能的尺寸分配
             const screenWidth = window.innerWidth;
             const screenHeight = window.innerHeight;
             
             let popupWidth, popupHeight;
             
             if (screenWidth <= 480) {
-                // 手机端
-                popupWidth = Math.min(Math.floor(screenWidth * 0.85), 160);
-                popupHeight = Math.max(Math.floor(screenHeight * 0.12), 60);
+                // 手机端 - 更合适的尺寸
+                popupWidth = Math.min(Math.floor(screenWidth * 0.85), 180);
+                popupHeight = Math.max(Math.floor(screenHeight * 0.18), 100);
             } else if (screenWidth <= 768) {
                 // 平板端
-                popupWidth = Math.min(Math.floor(screenWidth * 0.4), 180);
-                popupHeight = Math.max(Math.floor(screenHeight * 0.13), 70);
+                popupWidth = Math.min(Math.floor(screenWidth * 0.35), 220);
+                popupHeight = Math.max(Math.floor(screenHeight * 0.2), 120);
             } else {
-                // 桌面端
-                popupWidth = Math.min(Math.floor(screenWidth * 0.25), 200);
-                popupHeight = Math.max(Math.floor(screenHeight * 0.15), 80);
+                // 桌面端 - 更大更优雅
+                popupWidth = Math.min(Math.floor(screenWidth * 0.22), 280);
+                popupHeight = Math.max(Math.floor(screenHeight * 0.25), 140);
             }
             
-            // 随机位置计算
-            const maxX = screenWidth - popupWidth - 20;
-            const maxY = screenHeight - popupHeight - 20;
-            const randomX = Math.max(10, Math.floor(Math.random() * maxX));
-            const randomY = Math.max(10, Math.floor(Math.random() * maxY));
+            // 随机位置计算 - 避免边缘
+            const margin = 30;
+            const maxX = screenWidth - popupWidth - margin;
+            const maxY = screenHeight - popupHeight - margin;
+            const randomX = Math.max(margin, Math.floor(Math.random() * maxX));
+            const randomY = Math.max(margin, Math.floor(Math.random() * maxY));
             
-            // 随机样式
+            // 随机样式 - 更丰富的选择
             const bgColor = softColors[Math.floor(Math.random() * softColors.length)];
             const message = loveMessages[Math.floor(Math.random() * loveMessages.length)];
             const fontFamily = fonts[Math.floor(Math.random() * fonts.length)];
-            const opacity = 0.8 + Math.random() * 0.2;
             
             // 设置样式
             popup.style.width = popupWidth + 'px';
@@ -240,27 +432,48 @@
             popup.style.top = randomY + 'px';
             popup.style.backgroundColor = bgColor;
             popup.style.fontFamily = fontFamily;
-            popup.style.opacity = opacity;
-            popup.style.fontSize = Math.max(12, Math.min(16, popupHeight / 4)) + 'px';
-            popup.style.padding = '10px';
             
-            popup.textContent = message;
+            // 创建内容结构
+            const content = document.createElement('div');
+            content.className = 'love-popup-content';
             
-            // 点击关闭
+            // 添加爱心图标
+            const icon = document.createElement('i');
+            icon.className = 'fas fa-heart love-popup-icon';
+            
+            // 添加文字内容
+            const text = document.createElement('div');
+            text.className = 'love-popup-text';
+            text.textContent = message;
+            
+            // 组装内容
+            content.appendChild(icon);
+            content.appendChild(text);
+            popup.appendChild(content);
+            
+            // 点击关闭 - 添加淡出动画
             popup.onclick = function() {
-                this.remove();
-                popupCount--;
-                updateStats();
-            };
-            
-            // 自动消失
-            setTimeout(() => {
-                if (popup.parentNode) {
-                    popup.remove();
+                this.classList.add('fade-out');
+                setTimeout(() => {
+                    this.remove();
                     popupCount--;
                     updateStats();
+                }, 400);
+            };
+            
+            // 自动消失 - 添加淡出动画
+            setTimeout(() => {
+                if (popup.parentNode && !popup.classList.contains('fade-out')) {
+                    popup.classList.add('fade-out');
+                    setTimeout(() => {
+                        if (popup.parentNode) {
+                            popup.remove();
+                            popupCount--;
+                            updateStats();
+                        }
+                    }, 400);
                 }
-            }, 8000);
+            }, 10000); // 延长显示时间到10秒
             
             document.body.appendChild(popup);
             popupCount++;

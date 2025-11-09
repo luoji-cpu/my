@@ -37,4 +37,7 @@ Thumbs.db
 # 临时文件
 *.tmp
 *.temp
-.cache/
+.cache/node_modules
+._logger_
+venv
+.venv
